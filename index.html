@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>NeuroBridge — Neurology HIS</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=11">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="logo.svg" alt="NeuroBridge">
+      <div>
+        <b class="ltr">NeuroBridge <span class="dept">Neurology · HIS / EMR</span></b>
+        <small data-i18n="app.subtitle"></small>
+      </div>
+    </div>
+    <!-- على الجوال: شاشة وحدة في كل مرة مع زر تبديل -->
+    <div class="view-switch" role="tablist">
+      <button type="button" data-show="res"><i class="dot res"></i> <span data-i18n="tab.res"></span><i class="ping" hidden></i></button>
+      <button type="button" data-show="con"><i class="dot con"></i> <span data-i18n="tab.con"></span><i class="ping" hidden></i></button>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><i class="dot res"></i> <span data-i18n="legend.res"></span></span>
+      <span class="legend-item"><i class="dot con"></i> <span data-i18n="legend.con"></span></span>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" data-lang="ar">عربي</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button class="btn ghost sm" onclick="location.reload()" data-i18n="reset"></button>
+    </div>
+  </header>
+
+  <main class="split">
+    <!-- المقيم دائماً يمين والاستشاري يسار (بغض النظر عن اللغة) -->
+    <section class="panel res" id="panel-res">
+      <div class="panel-root"></div>
+      <div class="toasts"></div>
+    </section>
+    <section class="panel con" id="panel-con">
+      <div class="panel-root"></div>
+      <div class="toasts"></div>
+    </section>
+  </main>
+
+  <script src="app.js?v=11"></script>
+</body>
+</html>
