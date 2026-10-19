@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>NeuroBridge — العرض</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* العرض: صفحات بملء الشاشة، كل قسم «شريحة»، تنقّل بالأسهم أو التمرير
+   تصميم داكن واحد (مقصود) عشان يبرز على البروجكتر */
+:root {
+  --bg: #070d1a;
+  --bg-2: #0c1527;
+  --panel: rgba(255, 255, 255, .045);
+  --panel-2: rgba(255, 255, 255, .08);
+  --line: rgba(255, 255, 255, .1);
+  --text: #e9eef8;
+  --muted: #8b9ab4;
+  --res: #2dd4bf;
+  --con: #8b93f8;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --green: #4ade80;
+  --font: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+#deck { height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide {
+  position: relative; min-height: 100%; scroll-snap-align: start;
+  display: grid; place-items: center; padding: 7vh max(16px, 7vw); overflow: hidden;
+  perspective: 1200px;
+}
+.slide + .slide { border-top: 1px solid var(--line); }
+.wrap { width: min(1100px, 100%); position: relative; z-index: 1; }
+
+/* الظهور التدريجي بشكل ثلاثي الأبعاد */
+.reveal { opacity: 0; transform: translateY(40px) rotateX(18deg) translateZ(-60px); transform-origin: 50% 100%;
+  transition: opacity .8s ease, transform .9s cubic-bezier(.2, .8, .2, 1); transition-delay: calc(var(--d, 0) * 110ms); }
+.slide.active .reveal { opacity: 1; transform: none; }
+.no-io .reveal { opacity: 1; transform: none; }
+
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; letter-spacing: .3px;
+  color: var(--res); background: rgba(45, 212, 191, .1); border: 1px solid rgba(45, 212, 191, .25); padding: 6px 14px; border-radius: 999px; }
+h1, h2 { margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(30px, 4.4vw, 56px); font-weight: 700; line-height: 1.2; margin-top: 18px; }
+.lead { font-size: clamp(16px, 1.7vw, 22px); color: var(--muted); line-height: 1.8; max-width: 760px; margin: 14px 0 0; }
+.grad { background: linear-gradient(90deg, var(--res), var(--con)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ===== البداية ===== */
+.hero { background: radial-gradient(1200px 600px at 50% 40%, #12224a 0%, var(--bg) 70%); }
+#brain { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.hero .wrap { text-align: center; pointer-events: none; }
+.hero-logo { width: 84px; height: 84px; filter: drop-shadow(0 10px 40px rgba(139, 147, 248, .45)); }
+.hero h1 { font-size: clamp(54px, 9vw, 120px); font-weight: 700; letter-spacing: -1px; line-height: 1; margin-top: 18px; direction: ltr; }
+.hero .sub { font-size: clamp(18px, 2.2vw, 28px); margin-top: 18px; color: var(--text); font-weight: 500; }
+.hero .dept { margin-top: 10px; color: var(--muted); font-size: 15px; letter-spacing: 1.5px; direction: ltr; }
+.hint { position: absolute; bottom: 4vh; left: 50%; transform: translateX(-50%); z-index: 1; color: var(--muted); font-size: 13px;
+  display: flex; align-items: center; gap: 10px; animation: bob 2.2s ease-in-out infinite; }
+.key { border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px; font-size: 12px; background: var(--panel); }
+@keyframes bob { 50% { transform: translate(-50%, 6px); } }
+
+/* ===== المشكلة ===== */
+.problems { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 40px; }
+.prob { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
+.prob .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(248, 113, 113, .12); color: var(--red); }
+.prob h3 { margin: 16px 0 8px; font-size: 20px; }
+.prob p { margin: 0; color: var(--muted); line-height: 1.8; font-size: 15px; }
+
+/* ===== الفكرة: الجسر بين الأدوار ===== */
+.bridge { margin-top: 30px; width: 100%; height: auto; overflow: visible; }
+.bridge .arc { fill: none; stroke: url(#bg); stroke-width: 3; stroke-dasharray: 900; stroke-dashoffset: 900; transition: stroke-dashoffset 2s ease .3s; }
+.slide.active .bridge .arc { stroke-dashoffset: 0; }
+.bridge .node circle { stroke-width: 2; }
+.bridge text { font-family: var(--font); fill: var(--text); text-anchor: middle; }
+.bridge .role { font-size: 22px; font-weight: 700; }
+.bridge .desc { font-size: 14px; fill: var(--muted); }
+.idea-points { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+.pill { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 8px 16px; font-size: 15px; }
+
+/* ===== الخصائص: بطاقات تنقلب ===== */
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 34px; }
+.flip { position: relative; height: 230px; cursor: pointer; perspective: 1000px; border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: start; }
+.flip-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
+.flip.on .flip-inner { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 18px; padding: 22px; border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--panel-2), var(--panel)); display: flex; flex-direction: column; }
+.face.back { transform: rotateY(180deg); background: linear-gradient(160deg, rgba(139, 147, 248, .18), rgba(45, 212, 191, .08)); }
+.face .ic { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: rgba(45, 212, 191, .12); color: var(--res); }
+.face h3 { margin: 16px 0 8px; font-size: 19px; }
+.face p { margin: 0; color: var(--muted); line-height: 1.75; font-size: 14.5px; }
+.face.back p { color: var(--text); }
+.face .more { margin-top: auto; font-size: 12.5px; color: var(--con); font-weight: 600; }
+.flip:focus-visible .face { outline: 2px solid var(--con); outline-offset: 3px; }
+
+/* ===== رحلة طلب ===== */
+.journey { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 40px; position: relative; }
+.journey::before { content: ""; position: absolute; top: 27px; right: 8%; left: 8%; height: 2px; background: var(--line); }
+.step { position: relative; text-align: center; opacity: .18; transform: translateY(16px) scale(.96); transition: all .6s cubic-bezier(.2, .8, .2, 1); }
+.step.show { opacity: 1; transform: none; }
+.step .dot { width: 56px; height: 56px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+  background: var(--bg-2); border: 2px solid var(--line); position: relative; z-index: 1; }
+.step.show .dot { border-color: currentColor; box-shadow: 0 0 0 6px rgba(255, 255, 255, .03), 0 0 30px currentColor; }
+.step.res { color: var(--res); } .step.con { color: var(--con); } .step.sys { color: var(--amber); } .step.ok { color: var(--green); }
+.step .who { margin-top: 14px; font-size: 13px; font-weight: 700; }
+.step .what { margin-top: 6px; color: var(--text); font-size: 15px; line-height: 1.7; }
+.step-hint { margin-top: 30px; color: var(--muted); font-size: 13px; text-align: center; }
+
+/* ===== المقارنة ===== */
+.compare { margin-top: 30px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.compare table { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+.compare th, .compare td { padding: 14px 18px; text-align: start; border-bottom: 1px solid var(--line); }
+.compare th { background: var(--panel-2); font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .3px; }
+.compare tr:last-child td { border-bottom: 0; }
+.compare td:first-child { font-weight: 600; }
+.yes { color: var(--green); } .part { color: var(--amber); } .star { color: var(--con); font-weight: 700; }
+.compare tr.ours td { background: rgba(139, 147, 248, .07); }
+.note { margin-top: 12px; color: var(--muted); font-size: 12.5px; }
+
+/* ===== الفايدة بالأرقام ===== */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 40px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 28px 24px; }
+.stat b { display: block; font-size: clamp(44px, 6vw, 76px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; direction: ltr; text-align: start; }
+.stat span { display: block; margin-top: 12px; color: var(--muted); line-height: 1.7; font-size: 15px; }
+.stat small { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); opacity: .7; }
+
+/* ===== الخاتمة ===== */
+.cta { text-align: center; background: radial-gradient(900px 500px at 50% 30%, #172552 0%, var(--bg) 70%); }
+.btn { display: inline-flex; align-items: center; gap: 10px; margin-top: 34px; padding: 16px 32px; border-radius: 14px; font-size: 18px; font-weight: 700;
+  color: #06121f; background: linear-gradient(90deg, var(--res), var(--con)); text-decoration: none; box-shadow: 0 16px 50px rgba(139, 147, 248, .35);
+  transition: transform .2s; }
+.btn:hover { transform: translateY(-2px); }
+.btn:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.next-steps { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 40px; }
+.link-line { margin-top: 16px; color: var(--muted); font-size: 14px; }
+
+/* ===== التنقّل ===== */
+.dots { position: fixed; left: 22px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 5; }
+.dots button { width: 10px; height: 10px; border-radius: 50%; border: 0; padding: 0; background: var(--line); cursor: pointer; transition: all .3s; }
+.dots button.on { background: var(--con); height: 26px; border-radius: 6px; }
+.counter { position: fixed; left: 22px; bottom: 18px; z-index: 5; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; direction: ltr; }
+.brand-mini { position: fixed; right: 22px; top: 18px; z-index: 5; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; direction: ltr; opacity: .85; }
+.brand-mini img { width: 26px; height: 26px; }
+
+@media (max-width: 900px) {
+  .problems, .features, .stats { grid-template-columns: minmax(0, 1fr); }
+  .journey { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .journey::before { display: none; }
+  .flip { height: 210px; }
+  .dots { display: none; }
+  .compare { overflow-x: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="brand-mini"><img src="logo.svg" alt=""> NeuroBridge</div>
+<nav class="dots" aria-label="الأقسام"></nav>
+<div class="counter" id="counter"></div>
+
+<main id="deck">
+
+  <!-- 1. البداية -->
+  <section class="slide hero" data-title="البداية">
+    <canvas id="brain" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <img class="hero-logo reveal" src="logo.svg" alt="NeuroBridge" style="--d:0">
+      <h1 class="reveal" style="--d:1"><span class="grad">NeuroBridge</span></h1>
+      <div class="sub reveal" style="--d:2">نظام صلاحيات ذكي يربط المقيم وطبيب الامتياز بالاستشاري</div>
+      <div class="dept reveal" style="--d:3">NEUROLOGY · HIS / EMR PROTOTYPE</div>
+    </div>
+    <div class="hint"><span class="key">←</span> أو <span class="key">Space</span> للتالي</div>
+  </section>
+
+  <!-- 2. المشكلة -->
+  <section class="slide" data-title="المشكلة">
+    <div class="wrap">
+      <span class="eyebrow reveal">المشكلة</span>
+      <h2 class="reveal" style="--d:1">الصلاحيات اليوم ما تواكب<br>طريقة شغل القسم</h2>
+      <div class="problems">
+        <div class="prob reveal" style="--d:2">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></div>
+          <h3>طلبات خارج الصلاحية</h3>
+          <p>أدوية مقيدة وأشعة بالصبغة تنطلب بدون رجوع للاستشاري، والاستشاري يدري متأخر.</p>
+        </div>
+        <div class="prob reveal" style="--d:3">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M20 10a8 8 0 0 0-14-4L4 10M4 14a8 8 0 0 0 14 4l2-4"/></svg></div>
+          <h3>فحوصات مكررة</h3>
+          <p>نفس التحليل ينطلب أكثر من مرة خلال أيام، بدون مبرر واضح، وهذا يرفع التكلفة.</p>
+        </div>
+        <div class="prob reveal" style="--d:4">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div>
+          <h3>تأخر الرد على الطوارئ</h3>
+          <p>الاستشارات الطارئة ما لها وقت واضح، والاستشاري خارج المستشفى ما عنده صورة كاملة.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. الفكرة -->
+  <section class="slide" data-title="الفكرة">
+    <div class="wrap" style="text-align:center">
+      <span class="eyebrow reveal">الفكرة</span>
+      <h2 class="reveal" style="--d:1">جسر واحد بين <span class="grad">ثلاث أدوار</span></h2>
+      <p class="lead reveal" style="--d:2; margin-inline:auto">كل دور يشوف ويسوي اللي يناسبه، والاستشاري هو اللي يتحكم بالصلاحيات.</p>
+      <svg class="bridge reveal" style="--d:3" viewBox="0 0 900 260" role="img" aria-label="Intern, Resident, Consultant">
+        <defs>
+          <linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#8b93f8"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient>
+        </defs>
+        <path class="arc" id="arc1" d="M150 170 C 260 40, 340 40, 450 170"/>
+        <path class="arc" id="arc2" d="M450 170 C 560 40, 640 40, 750 170"/>
+        <circle r="5" fill="#fff"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#arc2"/></animateMotion></circle>
+        <circle r="5" fill="#fff"><animateMotion dur="3s" begin="1.5s" repeatCount="indefinite"><mpath href="#arc1"/></animateMotion></circle>
+        <g class="node"><circle cx="750" cy="170" r="34" fill="rgba(45,212,191,.15)" stroke="#2dd4bf"/><text x="750" y="232" class="role">Intern</text><text x="750" y="254" class="desc">طبيب امتياز</text></g>
+        <g class="node"><circle cx="450" cy="170" r="40" fill="rgba(45,212,191,.2)" stroke="#2dd4bf"/><text x="450" y="236" class="role">Resident</text><text x="450" y="258" class="desc">طبيب مقيم</text></g>
+        <g class="node"><circle cx="150" cy="170" r="46" fill="rgba(139,147,248,.22)" stroke="#8b93f8"/><text x="150" y="242" class="role">Consultant</text><text x="150" y="264" class="desc">استشاري</text></g>
+      </svg>
+      <div class="idea-points">
+        <span class="pill reveal" style="--d:4">Read-only</span>
+        <span class="pill reveal" style="--d:5">Note-write</span>
+        <span class="pill reveal" style="--d:6">Edit · للاستشاري فقط</span>
+        <span class="pill reveal" style="--d:7">In-pt · Out-pt · ER</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. الخصائص -->
+  <section class="slide" data-title="الخصائص">
+    <div class="wrap">
+      <span class="eyebrow reveal">الخصائص</span>
+      <h2 class="reveal" style="--d:1">ست خصائص أساسية</h2>
+      <p class="lead reveal" style="--d:2">اضغط على أي بطاقة عشان تشوف التفاصيل.</p>
+      <div class="features">
+        <button class="flip reveal" style="--d:3"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+            <h3>صلاحيات حسب المريض</h3><p>الاستشاري يعطي كل مقيم وامتياز الدخول لمرضى معينين.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Allow Access</h3><p>من المرضى اللي تحت اسمه، يختار الاستشاري لكل طبيب: اطلاع فقط (Read-only) أو كتابة نوتات وأوامر (Note-write). وأي تغيير يطبّق لحظياً.</p></div>
+        </div></button>
+        <button class="flip reveal" style="--d:4"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+            <h3>الطلبات المقيدة</h3><p>أدوية خطيرة وأشعة مكلفة تحتاج موافقة الاستشاري.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Restricted Orders</h3><p>tPA و Lyrica والمخدرات، و CT بالصبغة و MRI و CTA: المقيم ما يطلبها مباشرة، يرسل طلب موافقة بالسبب، والاستشاري يوافق أو يرفض.</p></div>
+        </div></button>
+        <button class="flip reveal" style="--d:5"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6"/><path d="M20 10a8 8 0 0 0-14-4L4 10"/><path d="M12 12v4M12 19h.01"/></svg></div>
+            <h3>تنبيه الفحص المكرر</h3><p>أي فحص انسوى خلال أسبوعين يحتاج مبرر طبي.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Duplicate Alert</h3><p>النظام يبين تاريخ الفحص السابق، والطلب ما ينرفض لكنه يحتاج مبرر يوصل للاستشاري. نفس فكرة BPA في Epic.</p></div>
+        </div></button>
+        <button class="flip reveal" style="--d:6"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+            <h3>التعديل والتوقيع</h3><p>الاستشاري يراجع ويعدّل ويوقّع أعمال المقيمين.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Edit · Cosign</h3><p>المقيم ما يقدر يعدّل أو يحذف بعد الحفظ. الاستشاري يعدّل أو يلغي أو يوقّع، والنص الأصلي يبقى محفوظ للمراجعة.</p></div>
+        </div></button>
+        <button class="flip reveal" style="--d:7"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div>
+            <h3>عداد الاستشارات</h3><p>كل استشارة لها وقت حسب أولويتها.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Consult Timer</h3><p>طارئ: ساعة · عاجل: ٤ ساعات · روتيني: ٢٤ ساعة. اللون يتغير كل ما قرب الوقت، والرد يوصل للمقيم فوراً.</p></div>
+        </div></button>
+        <button class="flip reveal" style="--d:8"><div class="flip-inner">
+          <div class="face"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></div>
+            <h3>الدخول من البيت</h3><p>الاستشاري يختار بنفسه وش يحتاج من البيت.</p><span class="more">اضغط للتفاصيل</span></div>
+          <div class="face back"><h3>Remote · Settings</h3><p>مثل Epic Haiku و Canto: النتائج، الموافقات، التوقيع، الأوامر وغيرها. الاستشاري يفعّل أو يوقف كل خاصية من الإعدادات.</p></div>
+        </div></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. رحلة طلب -->
+  <section class="slide" data-title="رحلة طلب">
+    <div class="wrap">
+      <span class="eyebrow reveal">مثال حي</span>
+      <h2 class="reveal" style="--d:1">رحلة طلب <span class="ltr">MRI</span> من البداية للنتيجة</h2>
+      <div class="journey">
+        <div class="step res frag"><div class="dot">1</div><div class="who">المقيم</div><div class="what">يطلب <span class="ltr">MRI Brain</span> لمريض جلطة</div></div>
+        <div class="step sys frag"><div class="dot">2</div><div class="who">النظام</div><div class="what">يمنع الطلب لأنه مقيد، ويطلب سبب إكلينيكي</div></div>
+        <div class="step res frag"><div class="dot">3</div><div class="who">المقيم</div><div class="what">يرسل طلب موافقة للاستشاري</div></div>
+        <div class="step con frag"><div class="dot">4</div><div class="who">الاستشاري · من البيت</div><div class="what">يوافق من جواله، والمقيم يوصله تنبيه</div></div>
+        <div class="step ok frag"><div class="dot">5</div><div class="who">النتيجة</div><div class="what">تطلع تحت الطلب نفسه في ملف المريض</div></div>
+      </div>
+      <div class="step-hint reveal" style="--d:2">اضغط <span class="key">←</span> لإظهار الخطوة التالية</div>
+    </div>
+  </section>
+
+  <!-- 6. المقارنة -->
+  <section class="slide" data-title="المقارنة">
+    <div class="wrap">
+      <span class="eyebrow reveal">المقارنة</span>
+      <h2 class="reveal" style="--d:1">قريبين من <span class="ltr">Epic</span>، ومختلفين فيما يهم</h2>
+      <div class="compare reveal" style="--d:2">
+        <table>
+          <thead><tr><th>الخاصية</th><th class="ltr">Epic</th><th class="ltr">NeuroBridge</th></tr></thead>
+          <tbody>
+            <tr><td>صلاحيات حسب الدور</td><td class="yes">موجودة</td><td class="yes">موجودة</td></tr>
+            <tr><td>تنبيه الفحص المكرر</td><td class="yes">موجود (BPA)</td><td class="yes">موجود + مبرر إلزامي</td></tr>
+            <tr><td>الطلبات المقيدة والموافقة</td><td class="yes">موجودة</td><td class="yes">موجودة</td></tr>
+            <tr><td>التوقيع (Cosign)</td><td class="yes">موجود</td><td class="yes">موجود</td></tr>
+            <tr><td>الدخول من البيت</td><td class="yes">Haiku · Canto</td><td class="yes">موجود</td></tr>
+            <tr class="ours"><td>من يحدد خصائص البيت؟</td><td class="part">إدارة المستشفى</td><td class="star">الاستشاري بنفسه</td></tr>
+            <tr class="ours"><td>عداد وقت الاستشارة الطارئة</td><td class="part">غير واضح</td><td class="star">موجود</td></tr>
+            <tr class="ours"><td>مخصص لقسم الأعصاب</td><td class="part">عام</td><td class="star">Code Stroke · tPA · EEG</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note reveal" style="--d:3">المصدر: أدلة مستشفيات تستخدم Epic (Houston Methodist، Inova، Renown، University of Iowa).</div>
+    </div>
+  </section>
+
+  <!-- 7. الفايدة -->
+  <section class="slide" data-title="الفايدة">
+    <div class="wrap">
+      <span class="eyebrow reveal">الفايدة</span>
+      <h2 class="reveal" style="--d:1">أثر يتقاس</h2>
+      <div class="stats">
+        <div class="stat reveal" style="--d:2"><b class="grad"><span class="count" data-to="20">0</span>%</b><span>تقليل الفحوصات المكررة بتنبيه واحد</span><small>دراسة NYU على Epic: ‎-20% في طلبات CBC</small></div>
+        <div class="stat reveal" style="--d:3"><b class="grad"><span class="count" data-to="60">0</span> min</b><span>حد أقصى واضح للرد على الاستشارة الطارئة</span><small>مع تنبيه لما يقرب الوقت</small></div>
+        <div class="stat reveal" style="--d:4"><b class="grad"><span class="count" data-to="100">0</span>%</b><span>من التعديلات محفوظة مع النص الأصلي واسم من عدّل</span><small>للمراجعة والمسؤولية</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. الخاتمة -->
+  <section class="slide cta" data-title="جرّب">
+    <div class="wrap">
+      <span class="eyebrow reveal">النموذج جاهز</span>
+      <h2 class="reveal" style="--d:1">خلونا نجرّبه <span class="grad">مباشرة</span></h2>
+      <a class="btn reveal" style="--d:2" href="index.html">افتح النموذج</a>
+      <div class="link-line reveal" style="--d:3"><span class="ltr">reemwork514-ctrl.github.io/neurobridge-demo</span></div>
+      <div class="next-steps">
+        <span class="pill reveal" style="--d:4">الخطوة الجاية: قاعدة بيانات حقيقية</span>
+        <span class="pill reveal" style="--d:5">تسجيل دخول آمن</span>
+        <span class="pill reveal" style="--d:6">تجربة مع القسم</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+'use strict';
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+const dotsBox = document.querySelector('.dots');
+const counter = document.getElementById('counter');
+let cur = 0;
+
+/* نقاط التنقّل */
+slides.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.setAttribute('aria-label', s.dataset.title);
+  b.title = s.dataset.title;
+  b.addEventListener('click', () => go(i));
+  dotsBox.appendChild(b);
+});
+
+function setActive(i) {
+  cur = i;
+  slides.forEach((s, j) => s.classList.toggle('active', j === i));
+  [...dotsBox.children].forEach((d, j) => d.classList.toggle('on', j === i));
+  counter.textContent = `${i + 1} / ${slides.length}`;
+  if (slides[i].querySelector('.count')) runCounters(slides[i]);
+}
+
+/* أي قسم ظاهر الحين */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) setActive(slides.indexOf(e.target)); });
+  }, { root: deck, rootMargin: '-45% 0px -45% 0px', threshold: 0 }); // القسم اللي يقطع منتصف الشاشة هو الحالي، حتى لو كان أطول منها
+  slides.forEach((s) => io.observe(s));
+} else {
+  document.body.classList.add('no-io');
+}
+setActive(0);
+
+function go(i) {
+  if (i < 0 || i >= slides.length) return;
+  slides[i].scrollIntoView({ behavior: 'smooth' });
+}
+// التالي: يظهر الخطوة الجاية في نفس القسم أولاً (رحلة الطلب)، وبعدها ينتقل
+function next() {
+  const hidden = slides[cur].querySelector('.frag:not(.show)');
+  if (hidden) { hidden.classList.add('show'); return; }
+  go(cur + 1);
+}
+function prev() {
+  const shown = [...slides[cur].querySelectorAll('.frag.show')];
+  if (shown.length) { shown[shown.length - 1].classList.remove('show'); return; }
+  go(cur - 1);
+}
+// العربي من اليمين لليسار: السهم الأيسر = التالي (ويشتغل مع ريموت العروض)
+document.addEventListener('keydown', (e) => {
+  if (['ArrowLeft', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) {
+    if (e.key === 'Enter' && document.activeElement?.classList.contains('flip')) return;
+    e.preventDefault(); next();
+  } else if (['ArrowRight', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
+  else if (e.key === 'Home') go(0);
+  else if (e.key === 'End') go(slides.length - 1);
+});
+document.querySelectorAll('.frag').forEach((f) => f.addEventListener('click', () => f.classList.add('show')));
+
+/* البطاقات: تنقلب بالضغط، وتميل مع الماوس */
+document.querySelectorAll('.flip').forEach((card) => {
+  card.addEventListener('click', () => card.classList.toggle('on'));
+  card.addEventListener('mousemove', (e) => {
+    if (card.classList.contains('on')) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    card.querySelector('.flip-inner').style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg)`;
+  });
+  card.addEventListener('mouseleave', () => { card.querySelector('.flip-inner').style.transform = ''; });
+});
+
+/* عدّاد الأرقام */
+function runCounters(slide) {
+  slide.querySelectorAll('.count').forEach((el) => {
+    if (el.dataset.done) return;
+    el.dataset.done = 1;
+    const to = +el.dataset.to, t0 = performance.now(), dur = 1400;
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(to * e);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+/* ===== شبكة أعصاب ثلاثية الأبعاد (بدون مكتبات) ===== */
+(function brain() {
+  const cv = document.getElementById('brain'), ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = 170, pts = [], edges = [], pulses = [];
+  // نقاط موزعة على شكل كرة (Fibonacci sphere) مع تشويه بسيط يشبه الدماغ
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963;
+    const wob = 1 + 0.12 * Math.sin(i * 1.7);
+    pts.push({ x: Math.cos(th) * r * 1.25 * wob, y: y * 0.9 * wob, z: Math.sin(th) * r * wob });
+  }
+  for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {
+    const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+    if (d < 0.36) edges.push([i, j]);
+  }
+  let W, H, DPR, ang = 0, mx = 0, my = 0;
+  function resize() {
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  addEventListener('resize', resize); resize();
+  addEventListener('mousemove', (e) => { mx = (e.clientX / innerWidth - 0.5); my = (e.clientY / innerHeight - 0.5); });
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function project(p, ry, rx) {
+    let x = p.x * Math.cos(ry) - p.z * Math.sin(ry), z = p.x * Math.sin(ry) + p.z * Math.cos(ry);
+    let y = p.y * Math.cos(rx) - z * Math.sin(rx); z = p.y * Math.sin(rx) + z * Math.cos(rx);
+    const s = Math.min(W, H) * 0.34, f = 3 / (3 + z);
+    return { x: W / 2 + x * s * f, y: H / 2 + y * s * f, z, f, cx: x };
+  }
+  function color(cx, a) { // من البنفسجي (الاستشاري) للأخضر (المقيم)
+    const t = (cx + 1.3) / 2.6;
+    return `rgba(${Math.round(lerp(139, 45, t))},${Math.round(lerp(147, 212, t))},${Math.round(lerp(248, 191, t))},${a})`;
+  }
+  let visible = true;
+  new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { root: deck }).observe(cv);
+  function frame() {
+    requestAnimationFrame(frame);
+    if (!visible) return;
+    if (!reduce) ang += 0.0025;
+    const ry = ang + mx * 0.6, rx = -0.25 + my * 0.4;
+    const P = pts.map((p) => project(p, ry, rx));
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineWidth = 1;
+    for (const [i, j] of edges) {
+      const a = P[i], b = P[j], alpha = 0.06 + 0.22 * ((a.f + b.f) / 2 - 0.75);
+      ctx.strokeStyle = color((a.cx + b.cx) / 2, Math.max(0.03, alpha));
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+    for (const p of P) {
+      ctx.fillStyle = color(p.cx, 0.35 + 0.6 * (p.f - 0.75));
+      ctx.beginPath(); ctx.arc(p.x, p.y, 1.2 + 2.2 * (p.f - 0.7), 0, Math.PI * 2); ctx.fill();
+    }
+    // إشارات عصبية تمشي على الوصلات
+    if (!reduce && pulses.length < 26 && Math.random() < 0.3) pulses.push({ e: edges[(Math.random() * edges.length) | 0], t: 0 });
+    for (let k = pulses.length - 1; k >= 0; k--) {
+      const pu = pulses[k]; pu.t += 0.02;
+      if (pu.t >= 1) { pulses.splice(k, 1); continue; }
+      const a = P[pu.e[0]], b = P[pu.e[1]], x = lerp(a.x, b.x, pu.t), y = lerp(a.y, b.y, pu.t);
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.shadowColor = color(a.cx, 1); ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+  frame();
+})();
+</script>
+</body>
+</html>
